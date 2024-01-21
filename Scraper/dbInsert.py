@@ -167,33 +167,43 @@ class DBINSERT:
                                  ORDER BY product_id DESC''')
         return int(self.cur.fetchone()[0])
 
-    def insert_group(self, search_query:str):
-        # this table can have multiple goups that fall under a single search query,
-        # thus a check for any existing grouops are not needed
-        self.cur.execute(''' INSERT INTO product_groups (search_query)
-                             VALUES (%s)''', (search_query,))
-        self.cur.execute(''' SELECT * FROM product_groups
-                                 ORDER BY group_id DESC''')
-        return int(self.cur.fetchone()[0]) # return pk of group
+
+    # Takes in list of products parsed
+    def insertProductList(self, productList:list):
+        for prod in productList:
+            prod_pk = self.dbInsertProduct(prod)
+            if(prod_pk == None):
+                print(prod)
+                raise ValueError
+
+
+    # def insert_group(self, search_query:str):
+    #     # this table can have multiple goups that fall under a single search query,
+    #     # thus a check for any existing grouops are not needed
+    #     self.cur.execute(''' INSERT INTO product_groups (search_query)
+    #                          VALUES (%s)''', (search_query,))
+    #     self.cur.execute(''' SELECT * FROM product_groups
+    #                              ORDER BY group_id DESC''')
+    #     return int(self.cur.fetchone()[0]) # return pk of group
         
     
         
-    def dbInsertGroups(self) -> None:
-        self.province_id = self.productList.get('province_id')
-        searh_query = self.productList.get('search_query')
-        groups = self.productList.get('groups')
-        for grp in groups:
-            group_pk = self.insert_group(searh_query)
-            products = grp.get('products')
-            # insert group and get pk of group to be used in the for loop
-            for prod in products:
-                prod_pk = self.dbInsertProduct(prod)
-                if(prod_pk == None):
-                    print(prod)
-                    raise ValueError
-                # insert into the product_groupings table
-                # self.cur.execute(''' INSERT INTO product_groupings (group_id, product_id)
-                #                      VALUES (%s, %s) ''', (group_pk, prod_pk))
+    # def dbInsertGroups(self) -> None:
+    #     self.province_id = self.productList.get('province_id')
+    #     searh_query = self.productList.get('search_query')
+    #     groups = self.productList.get('groups')
+    #     for grp in groups:
+    #         group_pk = self.insert_group(searh_query)
+    #         products = grp.get('products')
+    #         # insert group and get pk of group to be used in the for loop
+    #         for prod in products:
+    #             prod_pk = self.dbInsertProduct(prod)
+    #             if(prod_pk == None):
+    #                 print(prod)
+    #                 raise ValueError
+    #             # insert into the product_groupings table
+    #             # self.cur.execute(''' INSERT INTO product_groupings (group_id, product_id)
+    #             #                      VALUES (%s, %s) ''', (group_pk, prod_pk))
 
     def __del__(self):
         self.conn.commit()
